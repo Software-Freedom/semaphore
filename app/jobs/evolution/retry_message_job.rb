@@ -3,12 +3,6 @@ require "sidekiq/api"
 class Evolution::RetryMessageJob < ApplicationJob
   queue_as :default
 
-  sidekiq_options(
-    lock: :until_executed,
-    lock_ttl: 10.seconds,
-    unique_args: ->(args) { args[0] }
-  )
-
   def perform(lock_key, id)
     message = Chatwoot::Message.find_by_id(id)
 
@@ -16,7 +10,7 @@ class Evolution::RetryMessageJob < ApplicationJob
     return if message.delivery?
     
     message.update(retried: true)
-    Evolution::SendMessageJob.perform_now(lock_key, id)
+    Evolution::SendMessageJob.perform_later(lock_key, id)
   end
 
   class << self
