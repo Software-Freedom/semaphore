@@ -74,7 +74,7 @@ class Evolution::SendMessageJob < ApplicationJob
         message.update(sent_at: DateTime.current, evolution_remote_id: remote_id)
       end
 
-      Evolution::RetryMessageJob.set(wait: 1.minute).perform_later(lock_key, id)
+      Evolution::RetryMessageJob.set(wait: 70.seconds).perform_later(lock_key, id)
 
     rescue StandardError => e
       message.clear_cache_lock

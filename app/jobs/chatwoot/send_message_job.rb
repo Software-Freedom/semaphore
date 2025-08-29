@@ -37,8 +37,8 @@ class Chatwoot::SendMessageJob < ApplicationJob
       if response.success?
         message_id = response.parsed_response.dig("id")
         message.update(chatwoot_message_id: message_id, sent: true, sent_at: DateTime.current)
-      else
-        message.update(retried: true)
+      elsif !message.retried?
+        message.update(retried: true, retried_at: DateTime.current)
 
         Chatwoot::SendMessageJob.set(wait: 3.seconds).perform_later(lock_key, id)
       end

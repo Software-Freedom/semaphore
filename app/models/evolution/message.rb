@@ -29,6 +29,7 @@ module Evolution
     before_validation :set_evolution_remote_id
     before_validation :set_created_at
     before_destroy :clear_cache_lock 
+    before_update :set_delivery_at, if: -> { delivery_changed?(to: true) }
     after_create_commit :enqueue_send_message
     after_update_commit :clear_cache_lock, if: -> { saved_change_to_sent?(to: true) }
     after_update_commit :enqueue_next_message, if: -> { saved_change_to_sent?(to: true) }
@@ -177,6 +178,10 @@ module Evolution
 
     def set_created_at
       self.created_at ||= payload.dig(:date_time)
+    end
+
+    def set_delivery_at
+      self.delivery_at ||= DateTime.current
     end
 
     def enqueue_send_message
