@@ -34,6 +34,18 @@ class Chatwoot::Message < ApplicationRecord
     super.with_indifferent_access
   end
 
+  def media?
+    payload.dig(:attachments).try(:any?)
+  end
+
+  def audio?
+    media? && attachments.first["file_type"] == "audio"
+  end
+
+  def attachments
+    payload.dig(:attachments) || []
+  end
+
   def set_evolution_chat_id
     self.evolution_chat_id ||= payload.dig(:conversation, :meta, :sender, :identifier) ||
                                payload.dig(:conversation, :meta, :sender, :phone_number)&.delete("+")

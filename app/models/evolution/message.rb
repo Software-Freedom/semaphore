@@ -41,26 +41,6 @@ module Evolution
       super.with_indifferent_access
     end
 
-    def set_evolution_chat_id
-      self.evolution_chat_id ||= payload.dig(:data, :key, :remoteJid)
-    end
-
-    def set_evolution_remote_id
-      self.evolution_remote_id ||= payload.dig(:data, :key, :id)
-    end
-
-    def set_created_at
-      self.created_at ||= payload.dig(:date_time)
-    end
-
-    def ephemeral_message?
-      payload.dig(:data, :message, :ephemeralMessage, :message).present?
-    end
-
-    def data_message
-      payload.dig(:data, :message)
-    end
-
     def media?
       {
         image_message: data_message.dig(:imageMessage).present?,
@@ -71,6 +51,18 @@ module Evolution
         sticker_message: data_message.dig(:stickerMessage).present?,
         view_once_message_v2: data_message.dig(:viewOnceMessageV2).present?
       }.values.any?
+    end
+
+    def ephemeral_message?
+      payload.dig(:data, :message, :ephemeralMessage, :message).present?
+    end
+
+    def data_message
+      if ephemeral_message?
+        payload.dig(:data, :message, :ephemeralMessage, :message)
+      else
+        payload.dig(:data, :message)
+      end
     end
 
     def message_content_type
@@ -173,6 +165,18 @@ module Evolution
       return [] unless media?
 
       [payload.dig(:data, :message, :base64)]
+    end
+
+    def set_evolution_chat_id
+      self.evolution_chat_id ||= payload.dig(:data, :key, :remoteJid)
+    end
+
+    def set_evolution_remote_id
+      self.evolution_remote_id ||= payload.dig(:data, :key, :id)
+    end
+
+    def set_created_at
+      self.created_at ||= payload.dig(:date_time)
     end
 
     def enqueue_send_message
