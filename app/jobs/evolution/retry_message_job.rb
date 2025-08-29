@@ -10,7 +10,7 @@ class Evolution::RetryMessageJob < ApplicationJob
     return if Rails.cache.read(message.lock_delivery_key)
     return message.clear_cache_lock if message.retried?
     
-    message.update(retried: true, retried_at: Datetime.current)
+    message.update(retried: true, retried_at: DateTime.current)
     Evolution::SendMessageJob.perform_later(lock_key, id)
   end
 

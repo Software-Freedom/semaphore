@@ -62,7 +62,7 @@ class Chatwoot::Message < ApplicationRecord
   end
 
   def set_delivery_at
-    self.delivery_at ||= Datetime.current
+    self.delivery_at ||= DateTime.current
   end
 
   # callbacks
