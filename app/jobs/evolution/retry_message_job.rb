@@ -7,7 +7,8 @@ class Evolution::RetryMessageJob < ApplicationJob
     message = Chatwoot::Message.find_by_id(id)
 
     return unless message
-    return if message.delivery?
+    return if Rails.cache.read(message.lock_delivery_key)
+    return message.clear_cache_lock if message.retried?
     
     message.update(retried: true)
     Evolution::SendMessageJob.perform_later(lock_key, id)
