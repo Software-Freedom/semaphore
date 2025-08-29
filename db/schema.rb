@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2025_08_27_233328) do
+ActiveRecord::Schema[8.0].define(version: 2025_08_29_202432) do
   # These are extensions that must be enabled in order to support this database
   enable_extension "pg_catalog.plpgsql"
 
@@ -29,6 +29,8 @@ ActiveRecord::Schema[8.0].define(version: 2025_08_27_233328) do
     t.datetime "sent_at"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.datetime "retried_at"
+    t.datetime "delivery_at"
     t.index ["evolution_instance_id", "evolution_chat_id", "delivery", "created_at"], name: "index_chatwoot_messages_on_instance_chat_delivery_created_at"
     t.index ["evolution_instance_id", "evolution_chat_id", "delivery", "sent_at"], name: "index_chatwoot_messages_on_instance_chat_delivery_sent_at"
   end

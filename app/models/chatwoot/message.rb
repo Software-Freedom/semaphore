@@ -22,6 +22,7 @@ class Chatwoot::Message < ApplicationRecord
   before_validation :set_created_at
   before_destroy :clear_cache_lock 
   before_update :lock_delivery, if: -> { delivery_changed?(to: true) }
+  before_update :set_delivery_at, if: -> { delivery_changed?(to: true) }
   after_create_commit :enqueue_send_message
   after_update_commit :clear_retry_message, if: -> { saved_change_to_delivery?(to: true) }
   after_update_commit :clear_cache_lock, if: -> { saved_change_to_delivery?(to: true) }
@@ -58,6 +59,10 @@ class Chatwoot::Message < ApplicationRecord
 
   def set_created_at
     self.created_at ||= payload.dig(:created_at)
+  end
+
+  def set_delivery_at
+    self.delivery_at ||= Datetime.current
   end
 
   # callbacks
