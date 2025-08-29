@@ -11,7 +11,7 @@ class Evolution::SendMessageJob < ApplicationJob
     message = Chatwoot::Message.find_by_id(id)
 
     return unless message
-    return if message.delivery? || message.sent?
+    return if message.delivery?
 
     begin
       response = nil
@@ -78,6 +78,7 @@ class Evolution::SendMessageJob < ApplicationJob
 
     rescue StandardError => e
       message.clear_cache_lock
+      Rails.logger.error("[Evolution::SendMessageJob] Failed to clear cache lock: #{e.message}")
     end
   end
 end

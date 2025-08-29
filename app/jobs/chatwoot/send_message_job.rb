@@ -45,6 +45,7 @@ class Chatwoot::SendMessageJob < ApplicationJob
 
     rescue StandardError => e
       message.clear_cache_lock
+      Rails.logger.error("[Chatwoot::SendMessageJob] Failed to clear cache lock: #{e.message}")
     end
   end
 end
