@@ -1,7 +1,7 @@
 module Chatwoot
   class ConversationApi
     include HTTParty
-    base_uri "https://www.chatfly.com.br/api/v1"
+    base_uri ENV["CHATWOOT_URL"]
 
     class << self
       def conversations_filter(account_token:, account_id:)

@@ -5,7 +5,7 @@ require "marcel"
 module Chatwoot
   class MessageApi
     include HTTParty
-    base_uri "https://www.chatfly.com.br/api/v1"
+    base_uri ENV["CHATWOOT_URL"]
 
     class << self
 
