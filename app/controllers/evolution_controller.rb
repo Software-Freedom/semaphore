@@ -66,19 +66,26 @@ class EvolutionController < ApplicationController
       return
     end
 
-    cache_key = "conversation-id-#{instance_name}-#{remote_jid}"
-    conversation_id = Rails.cache.read(cache_key)
+    # cache_key = "conversation-id-#{instance_name}-#{remote_jid}"
+    # conversation_id = Rails.cache.read(cache_key)
 
-    unless conversation_id
-      conversation = Chatwoot::FindOrCreateConversationService.call(account_token: account_token, 
-                                                                    account_id: account_id, 
-                                                                    remote_jid: remote_jid,
-                                                                    instance_name: instance,
-                                                                    contact_name: contact_name)
-      conversation_id = conversation["id"]
-      Rails.cache.write(cache_key, conversation_id)
-    end
+    # unless conversation_id
+    #   conversation = Chatwoot::FindOrCreateConversationService.call(account_token: account_token, 
+    #                                                                 account_id: account_id, 
+    #                                                                 remote_jid: remote_jid,
+    #                                                                 instance_name: instance,
+    #                                                                 contact_name: contact_name)
+    #   conversation_id = conversation["id"]
+    #   Rails.cache.write(cache_key, conversation_id)
+    # end
 
+    conversation = Chatwoot::FindOrCreateConversationService.call(account_token: account_token, 
+                                                                account_id: account_id, 
+                                                                remote_jid: remote_jid,
+                                                                instance_name: instance,
+                                                                contact_name: contact_name)
+
+    conversation_id = conversation["id"]
     Evolution::Message.create!(
       event: event,
       evolution_instance_id: instance,
