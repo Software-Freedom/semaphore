@@ -30,6 +30,8 @@ module Evolution
     before_validation :set_created_at
     before_destroy :clear_cache_lock 
     before_update :set_delivery_at, if: -> { delivery_changed?(to: true) }
+    before_update :set_sent_at, if: -> { sent_changed?(to: true) }
+    before_update :set_retried_at, if: -> { retried_changed?(to: true) }
     after_create_commit :enqueue_send_message
     after_update_commit :clear_cache_lock, if: -> { saved_change_to_sent?(to: true) }
     after_update_commit :enqueue_next_message, if: -> { saved_change_to_sent?(to: true) }
@@ -182,6 +184,14 @@ module Evolution
 
     def set_delivery_at
       self.delivery_at ||= DateTime.current
+    end
+
+    def set_sent_at
+      self.sent_at ||= DateTime.current
+    end
+
+    def set_retried_at
+      self.retried_at ||= DateTime.current
     end
 
     def enqueue_send_message

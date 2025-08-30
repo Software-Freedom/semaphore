@@ -71,7 +71,7 @@ class Evolution::SendMessageJob < ApplicationJob
       remote_id = response.parsed_response.with_indifferent_access.dig(:key, :id)
 
       if remote_id.present?
-        message.update(sent: true, sent_at: DateTime.current, evolution_remote_id: remote_id)
+        message.update(sent: true, evolution_remote_id: remote_id)
       end
     rescue StandardError => e
       message.clear_cache_lock
@@ -85,7 +85,7 @@ class Evolution::SendMessageJob < ApplicationJob
         content: "#{details}#{message_info}#{backtrace_info}"
       )
     ensure
-      Evolution::RetryMessageJob.set(wait: 2.minutes).perform_later(lock_key, id)
+      Evolution::RetryMessageJob.set(wait: 1.minute).perform_later(lock_key, id)
     end
   end
 end

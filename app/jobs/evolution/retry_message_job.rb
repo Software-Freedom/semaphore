@@ -8,15 +8,15 @@ class Evolution::RetryMessageJob < ApplicationJob
 
     return unless message
     
+    return if Rails.cache.read(message.lock_delivery_key)
+
     if message.retried?
       message.clear_cache_lock 
       message.enqueue_next_message
       return 
     end
     
-    return if Rails.cache.read(message.lock_delivery_key)
-
-    message.update(retried: true, retried_at: DateTime.current)
+    message.update(retried: true)
     Evolution::SendMessageJob.perform_later(lock_key, id)
   end
 

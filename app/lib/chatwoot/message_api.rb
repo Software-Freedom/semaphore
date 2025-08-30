@@ -102,7 +102,6 @@ module Chatwoot
         delete("/accounts/#{account_id}/conversations/#{conversation_id}/messages/#{message_id}",
                 headers: headers)
       end
-
     end
   end
 end
