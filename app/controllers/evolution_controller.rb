@@ -48,8 +48,6 @@ class EvolutionController < ApplicationController
     account_id = params[:account_id]
     account_token = params[:account_token]
     event = params[:event]
-    remote_jid = params[:data].to_unsafe_h.dig(:key, :remoteJid)
-    contact_name = params[:data].to_unsafe_h.dig(:pushName)
 
     if message_type != Evolution::Message::MESSAGE_TYPE[:CONVERSATION] && 
       message_type != Evolution::Message::MESSAGE_TYPE[:MESSAGE] &&
@@ -66,32 +64,11 @@ class EvolutionController < ApplicationController
       return
     end
 
-    # cache_key = "conversation-id-#{instance_name}-#{remote_jid}"
-    # conversation_id = Rails.cache.read(cache_key)
-
-    # unless conversation_id
-    #   conversation = Chatwoot::FindOrCreateConversationService.call(account_token: account_token, 
-    #                                                                 account_id: account_id, 
-    #                                                                 remote_jid: remote_jid,
-    #                                                                 instance_name: instance,
-    #                                                                 contact_name: contact_name)
-    #   conversation_id = conversation["id"]
-    #   Rails.cache.write(cache_key, conversation_id)
-    # end
-
-    conversation = Chatwoot::FindOrCreateConversationService.call(account_token: account_token, 
-                                                                account_id: account_id, 
-                                                                remote_jid: remote_jid,
-                                                                instance_name: instance,
-                                                                contact_name: contact_name)
-
-    conversation_id = conversation["id"]
     Evolution::Message.create!(
       event: event,
       evolution_instance_id: instance,
       chatwoot_account_id: account_id,
       chatwoot_account_token: account_token,
-      chatwoot_conversation_id: conversation_id,
       payload: params.to_unsafe_h.except(:controller, :action)
     )
 

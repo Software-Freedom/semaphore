@@ -14,12 +14,28 @@ class Chatwoot::SendMessageJob < ApplicationJob
 
     begin
       message_type = message.payload.dig(:data, :messageType)
+      instance = message.evolution_instance_id
       content = message.chatwoot_content
       account_token = message.chatwoot_account_token
       account_id = message.chatwoot_account_id
       remote_jid = message.evolution_chat_id
-      conversation_id = message.chatwoot_conversation_id
       attachments = message.chatwoot_attachments
+      contact_name = message.payload.dig(:data, :pushName)
+
+      conversation = Chatwoot::FindOrCreateConversationService.call(account_token: account_token, 
+                                                                    account_id: account_id, 
+                                                                    remote_jid: remote_jid,
+                                                                    instance_name: instance,
+                                                                    contact_name: contact_name)
+      conversation_id = conversation["id"]
+
+      unless conversation_id
+        details = "Código: #{response.code}\n"
+        message_info = "Corpo: #{response.body}\n"
+        content = "Não foi possivel encontrada a conversa Evolution::Message ID: #{id}, #{details}#{message_info}"
+        Discord::MessageApi.send_message(content: content)
+        return
+      end
 
       if message.media?
         response = Chatwoot::MessageApi.create_new_message_attachment(account_token: account_token,

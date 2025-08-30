@@ -67,7 +67,7 @@ module Chatwoot
         content = "#{details}#{message_info}"
 
         Discord::MessageApi.send_message(content: content)
-        return
+        return response
       end
       
       response

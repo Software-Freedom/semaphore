@@ -25,7 +25,7 @@ module Chatwoot
         account_id:,
         inbox_id:,
         contact_id:,
-        source_id: Time.current.to_i,
+        source_id: SecureRandom.uuid,
         status: "open",
         assignee_id: nil,
         team_id: nil,
