@@ -61,9 +61,16 @@ module Chatwoot
         contact_id: contact["id"],
       )
 
-      return {} unless response.success?
+      unless response.success?
+        details = "Código: #{response.code}\n"
+        message_info = "Corpo: #{response.body}\n"
+        content = "#{details}#{message_info}"
+
+        Discord::MessageApi.send_message(content: content)
+        return
+      end
       
-      response.parsed_response.with_indifferent_access
+      response
     end
   end
 end

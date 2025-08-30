@@ -35,9 +35,11 @@ class Chatwoot::SendMessageJob < ApplicationJob
       end
 
       unless response.success?
-        Discord::MessageApi.send_message(
-          content: "[Chatwoot::SendMessageJob] ID da Mensagem: #{id}\n#{response.parsed_response}"
-        )
+        details = "Código: #{response.code}\n"
+        message_info = "Corpo: #{response.body}\n"
+        content = "#{details}#{message_info}"
+
+        Discord::MessageApi.send_message(content: content)
       end
 
       if response.success?
