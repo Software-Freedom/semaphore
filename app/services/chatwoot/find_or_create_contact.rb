@@ -56,7 +56,7 @@ module Chatwoot
 
       return unless response.success?
 
-      response
+      response.dig("payload", "contact")
     end
   end
 end

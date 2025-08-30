@@ -58,7 +58,7 @@ module Chatwoot
         account_token: @account_token,
         account_id: @account_id,
         inbox_id: inbox["id"],
-        contact_id: contact.dig("payload", "contact", "id"),
+        contact_id: contact["id"],
       )
 
       return {} unless response.success?
