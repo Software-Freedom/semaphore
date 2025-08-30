@@ -8,7 +8,7 @@ class Chatwoot::SendMessageJob < ApplicationJob
   )
 
   def perform(lock_key, id)
-    message = Evolution::Message.find_by_id(id)
+    message = Evolution::Message.lock("FOR UPDATE SKIP LOCKED").find_by_id(id)
 
     return unless message
 

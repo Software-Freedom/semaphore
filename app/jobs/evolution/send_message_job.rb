@@ -8,7 +8,7 @@ class Evolution::SendMessageJob < ApplicationJob
   )
 
   def perform(lock_key, id)
-    message = Chatwoot::Message.find_by_id(id)
+    message = Chatwoot::Message.lock("FOR UPDATE SKIP LOCKED").find_by_id(id)
 
     return unless message
     return if message.delivery?
@@ -71,7 +71,7 @@ class Evolution::SendMessageJob < ApplicationJob
       remote_id = response.parsed_response.with_indifferent_access.dig(:key, :id)
 
       if remote_id.present?
-        message.update(sent_at: DateTime.current, evolution_remote_id: remote_id)
+        message.update(sent: true, sent_at: DateTime.current, evolution_remote_id: remote_id)
       end
 
       Evolution::RetryMessageJob.set(wait: 70.seconds).perform_later(lock_key, id)
