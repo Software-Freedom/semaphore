@@ -66,17 +66,25 @@ class EvolutionController < ApplicationController
       return
     end
 
-    conversation = Chatwoot::FindOrCreateConversationService.call(account_token: account_token, 
-                                                                  account_id: account_id, 
-                                                                  remote_jid: remote_jid,
-                                                                  instance_name: instance,
-                                                                  contact_name: contact_name)
+    cache_key = "conversation-id-#{instance_name}-#{remote_jid}"
+    conversation_id = Rails.cache.read(cache_key)
+
+    unless conversation_id
+      conversation = Chatwoot::FindOrCreateConversationService.call(account_token: account_token, 
+                                                                    account_id: account_id, 
+                                                                    remote_jid: remote_jid,
+                                                                    instance_name: instance,
+                                                                    contact_name: contact_name)
+      conversation_id = conversation["id"]
+      Rails.cache.write(cache_key, conversation_id)
+    end
+
     Evolution::Message.create!(
       event: event,
       evolution_instance_id: instance,
       chatwoot_account_id: account_id,
       chatwoot_account_token: account_token,
-      chatwoot_conversation_id: conversation["id"],
+      chatwoot_conversation_id: conversation_id,
       payload: params.to_unsafe_h.except(:controller, :action)
     )
 
