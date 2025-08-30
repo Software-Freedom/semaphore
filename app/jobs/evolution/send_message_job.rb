@@ -74,11 +74,19 @@ class Evolution::SendMessageJob < ApplicationJob
         message.update(sent: true, sent_at: DateTime.current, evolution_remote_id: remote_id)
       end
 
-      Evolution::RetryMessageJob.set(wait: 70.seconds).perform_later(lock_key, id)
+      Evolution::RetryMessageJob.set(wait: 2.minutes).perform_later(lock_key, id)
 
     rescue StandardError => e
       message.clear_cache_lock
-      Rails.logger.error("[Evolution::SendMessageJob] Failed to clear cache lock: #{e.message}")
+      message.enqueue_next_message
+
+      details = "Erro: #{e.class} - #{e.message}\n"
+      message_info = "ID da Mensagem: #{id}\n"
+      backtrace_info = "Backtrace:\n#{e.backtrace.join("\n")}"
+
+      Discord::MessageApi.send_message( 
+        content: "#{details}#{message_info}#{backtrace_info}"
+      )
     end
   end
 end
