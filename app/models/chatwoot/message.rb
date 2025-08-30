@@ -53,7 +53,10 @@ class Chatwoot::Message < ApplicationRecord
   def attachments
     payload.dig(:attachments) || []
   end
-
+  
+  ###########
+  # ACTIONS #
+  ###########
   def set_evolution_chat_id
     self.evolution_chat_id ||= payload.dig(:conversation, :meta, :sender, :identifier) ||
                                payload.dig(:conversation, :meta, :sender, :phone_number)&.delete("+")

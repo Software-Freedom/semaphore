@@ -170,6 +170,9 @@ module Evolution
       [payload.dig(:data, :message, :base64)]
     end
 
+    ###########
+    # ACTIONS #
+    ###########
     def set_evolution_chat_id
       self.evolution_chat_id ||= payload.dig(:data, :key, :remoteJid)
     end
@@ -197,7 +200,7 @@ module Evolution
     def enqueue_send_message
       return unless Rails.cache.write(lock_key, true, unless_exist: true, expires_in: 30.seconds)
  
-      Chatwoot::SendMessageJob.set(wait: 1.second).perform_later(lock_key, id)
+      Chatwoot::SendMessageJob.set(wait: 2.seconds).perform_later(lock_key, id)
     end
 
     def clear_cache_lock
