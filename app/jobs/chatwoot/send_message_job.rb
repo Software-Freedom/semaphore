@@ -59,6 +59,7 @@ class Chatwoot::SendMessageJob < ApplicationJob
       end
 
       if response.success?
+        sleep(2)
         message_id = response["id"]
         message.update(chatwoot_message_id: message_id, sent: true, delivery: true)
       elsif !message.retried?
