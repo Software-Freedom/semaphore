@@ -34,13 +34,19 @@ class Chatwoot::SendMessageJob < ApplicationJob
                                                             content: content)
       end
 
+      unless response.success?
+        Discord::MessageApi.send_message(
+          content: "ID da Mensagem: #{id}\n#{response.parsed_response}"
+        )
+      end
+
       if response.success?
-        message_id = response.parsed_response.dig("id")
+        message_id = response["id"]
         message.update(chatwoot_message_id: message_id, sent: true, delivery: true)
       elsif !message.retried?
         message.update(retried: true)
 
-        Chatwoot::SendMessageJob.set(wait: 3.seconds).perform_later(lock_key, id)
+        Chatwoot::SendMessageJob.set(wait: 6.seconds).perform_later(lock_key, id)
       end
 
     rescue StandardError => e
