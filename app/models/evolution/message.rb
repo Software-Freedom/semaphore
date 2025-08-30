@@ -37,7 +37,7 @@ module Evolution
     after_update_commit :enqueue_next_message, if: -> { saved_change_to_sent?(to: true) }
 
     def lock_key
-      "evolution:message:conversation-#{chatwoot_conversation_id}"
+      "evolution:message:conversation-#{evolution_instance_id}-#{evolution_chat_id}"
     end
 
     def payload
