@@ -8,7 +8,7 @@ class Chatwoot::SendMessageJob < ApplicationJob
   )
 
   def perform(lock_key, id)
-    message = Evolution::Message.lock("FOR UPDATE SKIP LOCKED").find_by_id(id)
+    message = Evolution::Message.find_by_id(id)
 
     return unless message
 
@@ -22,15 +22,15 @@ class Chatwoot::SendMessageJob < ApplicationJob
       attachments = message.chatwoot_attachments
 
       if message.media?
-        response = Chatwoot::MessageApi.create_new_message_attachment( account_token: account_token, 
-                                                                        account_id: account_id, 
-                                                                        conversation_id: conversation_id, 
+        response = Chatwoot::MessageApi.create_new_message_attachment(account_token: account_token,
+                                                                        account_id: account_id,
+                                                                        conversation_id: conversation_id,
                                                                         content: content,
                                                                         attachments: attachments)
       else
-        response = Chatwoot::MessageApi.create_new_message( account_token: account_token, 
-                                                            account_id: account_id, 
-                                                            conversation_id: conversation_id, 
+        response = Chatwoot::MessageApi.create_new_message(account_token: account_token,
+                                                            account_id: account_id,
+                                                            conversation_id: conversation_id,
                                                             content: content)
       end
 
@@ -46,7 +46,7 @@ class Chatwoot::SendMessageJob < ApplicationJob
     rescue StandardError => e
       message.clear_cache_lock
       message.enqueue_next_message
-      
+
       details = "Erro: #{e.class} - #{e.message}\n"
       message_info = "ID da Mensagem: #{id}\n"
       backtrace_info = "Backtrace:\n#{e.backtrace.join("\n")}"

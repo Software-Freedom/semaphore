@@ -8,7 +8,7 @@ class Evolution::SendMessageJob < ApplicationJob
   )
 
   def perform(lock_key, id)
-    message = Chatwoot::Message.lock("FOR UPDATE SKIP LOCKED").find_by_id(id)
+    message = Chatwoot::Message.find_by_id(id)
 
     return unless message
     return if message.delivery?
@@ -37,12 +37,12 @@ class Evolution::SendMessageJob < ApplicationJob
           mime_type = File.extname(file_name_with_ext)
           file_name = "#{File.basename(file_name_with_ext, ".*")}#{mime_type}"
 
-          media_type = "document" if mime_type.to_s.in?(['.gif', '.svg', '.tiff', '.tif'])
-          
+          media_type = "document" if mime_type.to_s.in?([ ".gif", ".svg", ".tiff", ".tif" ])
+
           responses << Evolution::SendMessageApi.send_media(
             instance: instance,
             number: number,
-            media_type: media_type, 
+            media_type: media_type,
             mime_type: nil,
             media: media,
             file_name: file_name,
@@ -66,16 +66,13 @@ class Evolution::SendMessageJob < ApplicationJob
           text: text
         )
       end
-    
+
       response = responses.last if responses.any?
       remote_id = response.parsed_response.with_indifferent_access.dig(:key, :id)
 
       if remote_id.present?
         message.update(sent: true, sent_at: DateTime.current, evolution_remote_id: remote_id)
       end
-
-      Evolution::RetryMessageJob.set(wait: 2.minutes).perform_later(lock_key, id)
-
     rescue StandardError => e
       message.clear_cache_lock
       message.enqueue_next_message
@@ -84,9 +81,11 @@ class Evolution::SendMessageJob < ApplicationJob
       message_info = "ID da Mensagem: #{id}\n"
       backtrace_info = "Backtrace:\n#{e.backtrace.join("\n")}"
 
-      Discord::MessageApi.send_message( 
+      Discord::MessageApi.send_message(
         content: "#{details}#{message_info}#{backtrace_info}"
       )
+    ensure
+      Evolution::RetryMessageJob.set(wait: 2.minutes).perform_later(lock_key, id)
     end
   end
 end
